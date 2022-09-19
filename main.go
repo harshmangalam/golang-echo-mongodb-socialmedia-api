@@ -37,17 +37,19 @@ func main() {
 
 	db := mongoClient.Database(os.Getenv("MONGO_DB_NAME"))
 
-	authHandler := handlers.NewAuthHandler(db)
-
 	// auth group routes
+	authHandler := handlers.NewAuthHandler(db)
 	auth := e.Group("/auth")
 	auth.POST("/login", authHandler.AuthLogin)
 	auth.POST("/signup", authHandler.AuthSignup)
 
-	// post group
+	// users group
+	userHandler := handlers.NewUserHandler(db)
+	users := e.Group("/users")
+	users.GET("/", userHandler.GetUsers)
 
+	// posts group
 	postHandler := handlers.NewPostHandler(db)
-
 	post := e.Group("/posts")
 	post.Use(middlewares.CheckAuth())
 	post.GET("/", postHandler.GetPosts)
