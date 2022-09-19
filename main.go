@@ -39,18 +39,18 @@ func main() {
 
 	// auth group routes
 	authHandler := handlers.NewAuthHandler(db)
-	auth := e.Group("/auth")
+	auth := e.Group("/api/auth")
 	auth.POST("/login", authHandler.AuthLogin)
 	auth.POST("/signup", authHandler.AuthSignup)
 
 	// users group
 	userHandler := handlers.NewUserHandler(db)
-	users := e.Group("/users")
+	users := e.Group("/api/users")
 	users.GET("/", userHandler.GetUsers)
 
 	// posts group
 	postHandler := handlers.NewPostHandler(db)
-	post := e.Group("/posts")
+	post := e.Group("/api/posts")
 	post.Use(middlewares.CheckAuth())
 	post.GET("/", postHandler.GetPosts)
 
