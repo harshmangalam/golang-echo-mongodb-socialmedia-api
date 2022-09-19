@@ -4,9 +4,9 @@ import (
 	"net/http"
 )
 
-func createCookie(value string) *http.Cookie {
+func CreateCookie(key, value string) *http.Cookie {
 	cookie := new(http.Cookie)
-	cookie.Name = "access_token"
+	cookie.Name = key
 	cookie.Value = value
 
 	return cookie
