@@ -1,15 +1,18 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo/v4"
 )
 
 const JWT_SECRET = "itssecret"
 
 func GenerateJWTToken(userId string) (string, error) {
+	fmt.Println(userId)
 	// Create a new token object, specifying signing method and the claims
 
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -25,19 +28,23 @@ func GenerateJWTToken(userId string) (string, error) {
 	return tokenString, err
 }
 
-func VerifyJWTToken(tokenString string) (interface{}, error) {
-
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+func ParseTokenFunc(tokenString string, c echo.Context) (interface{}, error) {
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != "HS256" {
+			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
 		return []byte(JWT_SECRET), nil
-	})
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims["id"], nil
-	} else {
-		return nil, err
 	}
 
+	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
+	token, err := jwt.Parse(tokenString, keyFunc)
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	return claims["id"].(string), nil
 }
