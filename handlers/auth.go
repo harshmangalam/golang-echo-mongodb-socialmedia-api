@@ -1,18 +1,23 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
+	"socialmedia/models"
+	"socialmedia/utils"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthHandler struct {
-	mongoClient *mongo.Client
+	coll *mongo.Collection
 }
 
-func NewAuthHandler(mongoClient *mongo.Client) *AuthHandler {
-	return &AuthHandler{mongoClient}
+func NewAuthHandler(db *mongo.Database) *AuthHandler {
+	coll := db.Collection("user")
+	return &AuthHandler{coll}
 }
 
 func (h *AuthHandler) AuthLogin(c echo.Context) error {
@@ -34,8 +39,43 @@ func (h *AuthHandler) AuthSignup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	//
-	return c.JSON(http.StatusCreated, signupData)
+	// check duplicate email address
+
+	// user := new(models.User)
+
+	var user models.User
+	filter := bson.D{{"email", signupData.Email}}
+	if err := h.coll.FindOne(context.TODO(), filter).Decode(&user); err != nil {
+
+		// create new user if user not exists
+		if err == mongo.ErrNoDocuments {
+			// hash plain password
+			hashedPassword, err := utils.HashPassword(signupData.Password)
+
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+
+			// insert data
+			result, err := h.coll.InsertOne(context.TODO(), bson.D{{"name", signupData.Name}, {"email", signupData.Email}, {"password", hashedPassword}})
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			// find new inserted data
+			if err := h.coll.FindOne(context.TODO(), bson.D{{"_id", result.InsertedID}}).Decode(&user); err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+
+			// remove password fiemd in response
+			user.Password = ""
+
+			return c.JSON(http.StatusCreated, user)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// user already exists
+	return c.JSON(http.StatusBadRequest, map[string]string{"message": "User already exists"})
 }
 
 func (h *AuthHandler) AuthLogout(c echo.Context) error {
