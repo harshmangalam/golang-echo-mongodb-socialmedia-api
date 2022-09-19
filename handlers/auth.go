@@ -104,7 +104,7 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 
 	// jwt token
 
-	token, err := utils.GenerateJWTToken(user.Id.String())
+	token, err := utils.GenerateJWTToken(user.Id)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
