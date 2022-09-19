@@ -3,13 +3,12 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
-
-const JWT_SECRET = "itssecret"
 
 func GenerateJWTToken(userId string) (string, error) {
 	fmt.Println(userId)
@@ -23,7 +22,7 @@ func GenerateJWTToken(userId string) (string, error) {
 	claims["id"] = userId
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte(JWT_SECRET))
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
 	return tokenString, err
 }
@@ -33,7 +32,7 @@ func ParseTokenFunc(tokenString string, c echo.Context) (interface{}, error) {
 		if t.Method.Alg() != "HS256" {
 			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
-		return []byte(JWT_SECRET), nil
+		return []byte(os.Getenv("JWT_SECRET")), nil
 	}
 
 	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
