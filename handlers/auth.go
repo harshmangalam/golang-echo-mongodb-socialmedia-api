@@ -101,7 +101,23 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"message": "Invalid credentials"})
 
 	}
-	return c.JSON(http.StatusOK, user)
+
+	// jwt token
+
+	token, err := utils.GenerateJWTToken(user.Id.String())
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// set access_token in cookies
+
+	cookie := utils.CreateCookie("access_token", token)
+
+	c.SetCookie(cookie)
+
+	user.Password = ""
+	return c.JSON(http.StatusOK, map[string]interface{}{"user": user, "token": token})
 }
 
 func (h *AuthHandler) AuthMe(c echo.Context) error {
