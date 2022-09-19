@@ -124,11 +124,3 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"user": user, "token": token})
 }
-
-func (h *AuthHandler) AuthMe(c echo.Context) error {
-	return c.String(http.StatusOK, "Me")
-}
-
-func (h *AuthHandler) AuthLogout(c echo.Context) error {
-	return c.String(http.StatusOK, "Login")
-}

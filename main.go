@@ -43,8 +43,6 @@ func main() {
 	auth := e.Group("/auth")
 	auth.POST("/login", authHandler.AuthLogin)
 	auth.POST("/signup", authHandler.AuthSignup)
-	auth.GET("/me", authHandler.AuthMe)
-	auth.GET("/logout", authHandler.AuthLogout)
 
 	// post group
 
