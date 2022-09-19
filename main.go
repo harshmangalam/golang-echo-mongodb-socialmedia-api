@@ -1,15 +1,18 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+
+	auth := e.Group("/auth")
+
+	auth.POST("/login", func(c echo.Context) error {})
+	auth.POST("/signup", func(c echo.Context) error {})
+	auth.GET("/logout", func(c echo.Context) error {})
+	auth.GET("/me", func(c echo.Context) error {})
+
 	e.Logger.Fatal(e.Start(":4000"))
 }
