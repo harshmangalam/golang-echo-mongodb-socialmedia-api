@@ -4,13 +4,15 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthHandler struct {
+	mongoClient *mongo.Client
 }
 
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
+func NewAuthHandler(mongoClient *mongo.Client) *AuthHandler {
+	return &AuthHandler{mongoClient}
 }
 
 func (h *AuthHandler) AuthLogin(c echo.Context) error {
