@@ -20,10 +20,6 @@ func NewAuthHandler(db *mongo.Database) *AuthHandler {
 	return &AuthHandler{coll}
 }
 
-func (h *AuthHandler) AuthLogin(c echo.Context) error {
-	return c.String(http.StatusOK, "Login")
-}
-
 func (h *AuthHandler) AuthSignup(c echo.Context) error {
 	// parse request body in form of struct
 	type SignupData struct {
@@ -78,10 +74,40 @@ func (h *AuthHandler) AuthSignup(c echo.Context) error {
 	return c.JSON(http.StatusBadRequest, map[string]string{"message": "User already exists"})
 }
 
-func (h *AuthHandler) AuthLogout(c echo.Context) error {
-	return c.String(http.StatusOK, "Logout")
+func (h *AuthHandler) AuthLogin(c echo.Context) error {
+
+	type LoginData struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	loginData := new(LoginData)
+
+	// get request body data
+	if err := c.Bind(loginData); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	var user models.User
+
+	// match user email
+	if err := h.coll.FindOne(context.TODO(), bson.M{"email": loginData.Email}).Decode(&user); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"message": "Invalid credentials"})
+	}
+
+	// match user password
+
+	if !utils.MatchPassword(loginData.Password, user.Password) {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"message": "Invalid credentials"})
+
+	}
+	return c.JSON(http.StatusOK, user)
 }
 
 func (h *AuthHandler) AuthMe(c echo.Context) error {
 	return c.String(http.StatusOK, "Me")
+}
+
+func (h *AuthHandler) AuthLogout(c echo.Context) error {
+	return c.String(http.StatusOK, "Login")
 }
