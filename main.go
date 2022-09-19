@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"socialmedia/handlers"
+	"socialmedia/models"
 	"socialmedia/utils"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -37,7 +40,7 @@ func main() {
 		}
 	}()
 
-	db := mongoClient.Database("go-socialmedia")
+	db := mongoClient.Database(os.Getenv("MONGO_DB_NAME"))
 
 	authHandler := handlers.NewAuthHandler(db)
 
@@ -57,7 +60,21 @@ func main() {
 		SigningKey:     []byte(os.Getenv("JWT_SECRET")),
 		ParseTokenFunc: utils.ParseTokenFunc,
 		SuccessHandler: func(c echo.Context) {
-			fmt.Println(c.Get("userId"))
+			userColl := db.Collection("user")
+			user := new(models.User)
+			userId, err := primitive.ObjectIDFromHex(c.Get("userId").(string))
+			if err != nil {
+				c.JSON(http.StatusNotFound, err.Error())
+				return
+			}
+			if err := userColl.FindOne(context.TODO(), bson.M{"_id": userId}).Decode(user); err != nil {
+
+				c.JSON(http.StatusNotFound, err.Error())
+				return
+			}
+
+			user.Password = ""
+			c.Set("user", user)
 		},
 		ContextKey: "userId",
 	}))
