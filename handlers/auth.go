@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"socialmedia/models"
 	"socialmedia/utils"
@@ -102,9 +104,13 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 
 	}
 
+	// do not show  password
+	user.Password = ""
+
 	// jwt token
 
-	token, err := utils.GenerateJWTToken(user.Id)
+	payload, _ := json.Marshal(user)
+	token, err := utils.GenerateJWTToken(string(payload))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -112,11 +118,10 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 
 	// set access_token in cookies
 
-	cookie := utils.CreateCookie("access_token", token)
+	cookie := utils.CreateCookie("access_token", fmt.Sprintf("Bearer %v", token))
 
 	c.SetCookie(cookie)
 
-	user.Password = ""
 	return c.JSON(http.StatusOK, map[string]interface{}{"user": user, "token": token})
 }
 
