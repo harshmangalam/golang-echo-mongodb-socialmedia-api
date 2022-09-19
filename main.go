@@ -26,7 +26,9 @@ func main() {
 		}
 	}()
 
-	authHandler := handlers.NewAuthHandler(mongoClient)
+	db := mongoClient.Database("go-socialmedia")
+
+	authHandler := handlers.NewAuthHandler(db)
 
 	// auth group routes
 	auth := e.Group("/auth")
