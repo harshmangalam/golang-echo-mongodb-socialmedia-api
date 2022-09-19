@@ -5,11 +5,10 @@ import (
 	"log"
 	"os"
 	"socialmedia/handlers"
-	"socialmedia/utils"
+	"socialmedia/middlewares"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -52,10 +51,7 @@ func main() {
 	postHandler := handlers.NewPostHandler(db)
 
 	post := e.Group("/posts")
-	post.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:     []byte(os.Getenv("JWT_SECRET")),
-		ParseTokenFunc: utils.ParseTokenFunc,
-	}))
+	post.Use(middlewares.CheckAuth())
 	post.GET("/", postHandler.GetPosts)
 
 	e.Logger.Fatal(e.Start(":4000"))
