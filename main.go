@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"socialmedia/handlers"
 	"socialmedia/utils"
 
@@ -23,7 +24,7 @@ func main() {
 	e := echo.New()
 	// mongodb connection
 
-	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017/go-socialmedia"))
+	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
 
 	if err != nil {
 		panic(err)
@@ -53,7 +54,7 @@ func main() {
 
 	post := e.Group("/posts")
 	post.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:     []byte("itssecret"),
+		SigningKey:     []byte(os.Getenv("JWT_SECRET")),
 		ParseTokenFunc: utils.ParseTokenFunc,
 		SuccessHandler: func(c echo.Context) {
 			fmt.Println(c.Get("userId"))
