@@ -49,6 +49,7 @@ func main() {
 	users.Use(middlewares.CheckAuth())
 	users.GET("/", userHandler.GetUsers)
 	users.GET("/me", userHandler.GetCurrentUser)
+	users.GET("/logout", userHandler.LogoutUser)
 
 	// posts group
 	postHandler := handlers.NewPostHandler(db)

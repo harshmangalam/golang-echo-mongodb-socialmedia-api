@@ -25,3 +25,7 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 	user := c.Get("user")
 	return c.JSON(http.StatusOK, user)
 }
+
+func (h *UserHandler) LogoutUser(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+}
