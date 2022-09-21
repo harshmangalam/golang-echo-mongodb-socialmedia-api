@@ -46,7 +46,9 @@ func main() {
 	// users group
 	userHandler := handlers.NewUserHandler(db)
 	users := e.Group("/api/users")
+	users.Use(middlewares.CheckAuth())
 	users.GET("/", userHandler.GetUsers)
+	users.GET("/me", userHandler.GetCurrentUser)
 
 	// posts group
 	postHandler := handlers.NewPostHandler(db)

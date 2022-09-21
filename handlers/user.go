@@ -20,3 +20,8 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, "users")
 }
+
+func (h *UserHandler) GetCurrentUser(c echo.Context) error {
+	user := c.Get("user")
+	return c.JSON(http.StatusOK, user)
+}
