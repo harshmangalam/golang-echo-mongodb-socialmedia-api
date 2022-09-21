@@ -22,7 +22,17 @@ func NewUserHandler(db *mongo.Database) *UserHandler {
 
 func (h *UserHandler) GetUsers(c echo.Context) error {
 
-	return c.JSON(http.StatusOK, "users")
+	cursor, err := h.coll.Find(context.TODO(), bson.M{})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+
+	}
+
+	var users []models.User
+
+	cursor.All(context.TODO(), &users)
+	return c.JSON(http.StatusOK, users)
 }
 
 func (h *UserHandler) GetCurrentUser(c echo.Context) error {
