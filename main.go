@@ -50,6 +50,7 @@ func main() {
 	users.GET("/", userHandler.GetUsers)
 	users.GET("/me", userHandler.GetCurrentUser)
 	users.GET("/logout", userHandler.LogoutUser)
+	users.GET("/:id", userHandler.GetUser)
 
 	// posts group
 	postHandler := handlers.NewPostHandler(db)

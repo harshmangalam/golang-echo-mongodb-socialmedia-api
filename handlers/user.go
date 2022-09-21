@@ -29,10 +29,26 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 
 	}
 
+	defer cursor.Close(context.TODO())
 	var users []models.User
 
 	cursor.All(context.TODO(), &users)
 	return c.JSON(http.StatusOK, users)
+}
+
+func (h *UserHandler) GetUser(c echo.Context) error {
+	id := c.Param("id")
+	userId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+	}
+	var user models.User
+
+	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": userId}).Decode(&user); err != nil {
+		return c.JSON(http.StatusNotFound, err.Error())
+	}
+	return c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) GetCurrentUser(c echo.Context) error {
