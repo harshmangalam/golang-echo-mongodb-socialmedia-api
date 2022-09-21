@@ -27,5 +27,7 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 }
 
 func (h *UserHandler) LogoutUser(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "User log out successfully",
+	})
 }
