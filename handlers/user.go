@@ -53,8 +53,7 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 
 func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 	user := c.Get("user").(models.User)
-	userId, _ := primitive.ObjectIDFromHex(user.Id)
-	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": userId}).Decode(&user); err != nil {
+	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": user.Id}).Decode(&user); err != nil {
 		return c.JSON(http.StatusNotFound, err.Error())
 	}
 	return c.JSON(http.StatusOK, user)
@@ -62,8 +61,7 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 
 func (h *UserHandler) LogoutUser(c echo.Context) error {
 	user := c.Get("user").(models.User)
-	userId, _ := primitive.ObjectIDFromHex(user.Id)
-	filter := bson.M{"_id": userId}
+	filter := bson.M{"_id": user.Id}
 	update := bson.M{"$set": bson.M{"isActive": false}}
 	h.coll.UpdateOne(context.TODO(), filter, update)
 	return c.JSON(http.StatusOK, map[string]interface{}{
