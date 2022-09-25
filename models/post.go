@@ -1,12 +1,17 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Post struct {
-	Id        string    `json:"_id" bson:"_id"`
-	Content   string    `json:"content" bson:"content"`
-	Image     string    `json:"image" bson:"image"`
-	UserId    string    `json:"userId" bson:"userId"`
-	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
+	Id        primitive.ObjectID `json:"_id,omitempty" bson:"_id"`
+	Content   string             `json:"content,omitempty" bson:"content"`
+	Image     string             `json:"image,omitempty" bson:"image"`
+	User      User               `json:"user,omitempty" bson:"user"`
+	UserId    primitive.ObjectID `json:"-" bson:"userId"`
+	CreatedAt time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
+	UpdatedAt time.Time          `json:"updatedAt,omitempty" bson:"updatedAt"`
 }
