@@ -10,7 +10,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -107,14 +106,13 @@ func (h *AuthHandler) AuthLogin(c echo.Context) error {
 
 	// update user to active state
 
-	userId, _ := primitive.ObjectIDFromHex(user.Id)
-	filter := bson.M{"_id": userId}
+	filter := bson.M{"_id": user.Id}
 	update := bson.M{"$set": bson.M{"isActive": true}}
 	h.coll.UpdateOne(context.TODO(), filter, update)
 
 	// fetch user
 
-	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": userId}).Decode(&user); err != nil {
+	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": user.Id}).Decode(&user); err != nil {
 		fmt.Println(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
