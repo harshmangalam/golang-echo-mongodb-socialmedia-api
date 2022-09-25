@@ -12,18 +12,29 @@ import (
 
 type PostHandler struct {
 	postColl *mongo.Collection
+	userColl *mongo.Collection
 }
 
 func NewPostHandler(db *mongo.Database) *PostHandler {
 	postColl := db.Collection("post")
-
-	return &PostHandler{postColl}
+	userColl := db.Collection("user")
+	return &PostHandler{postColl, userColl}
 }
 
 func (h *PostHandler) GetPosts(c echo.Context) error {
-	user := c.Get("user")
+	cursor, err := h.postColl.Find(context.TODO(), bson.M{})
 
-	return c.JSON(http.StatusOK, user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+
+	}
+
+	defer cursor.Close(context.TODO())
+	var posts []models.Post
+
+	cursor.All(context.TODO(), &posts)
+	return c.JSON(http.StatusOK, posts)
+
 }
 
 func (h *PostHandler) CreatePost(c echo.Context) error {
