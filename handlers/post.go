@@ -11,12 +11,13 @@ import (
 )
 
 type PostHandler struct {
-	coll *mongo.Collection
+	postColl *mongo.Collection
 }
 
 func NewPostHandler(db *mongo.Database) *PostHandler {
-	coll := db.Collection("user")
-	return &PostHandler{coll}
+	postColl := db.Collection("post")
+
+	return &PostHandler{postColl}
 }
 
 func (h *PostHandler) GetPosts(c echo.Context) error {
@@ -40,7 +41,7 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 	}
 
 	doc := bson.M{"content": newPost.Content, "image": newPost.Image, "userId": userId}
-	inseredPost, err := h.coll.InsertOne(context.TODO(), doc)
+	inseredPost, err := h.postColl.InsertOne(context.TODO(), doc)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -49,7 +50,7 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 
 	var createdPost models.Post
 
-	if err := h.coll.FindOne(context.TODO(), bson.M{"_id": inseredPost.InsertedID}).Decode(&createdPost); err != nil {
+	if err := h.postColl.FindOne(context.TODO(), bson.M{"_id": inseredPost.InsertedID}).Decode(&createdPost); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 
 	}
