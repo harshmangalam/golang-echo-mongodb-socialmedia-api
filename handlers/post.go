@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -35,6 +36,23 @@ func (h *PostHandler) GetPosts(c echo.Context) error {
 	cursor.All(context.TODO(), &posts)
 
 	return c.JSON(http.StatusOK, posts)
+
+}
+
+func (h *PostHandler) GetPost(c echo.Context) error {
+
+	postId, err := primitive.ObjectIDFromHex(c.Param("id"))
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+
+	}
+	var post models.Post
+	if err := h.postColl.FindOne(context.TODO(), bson.M{"_id": postId}).Decode(&post); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, post)
 
 }
 

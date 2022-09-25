@@ -57,6 +57,7 @@ func main() {
 	post := e.Group("/api/posts")
 	post.Use(middlewares.CheckAuth())
 	post.GET("/", postHandler.GetPosts)
+	post.GET("/:id", postHandler.GetPost)
 	post.POST("/", postHandler.CreatePost)
 
 	e.Logger.Fatal(e.Start(":4000"))
