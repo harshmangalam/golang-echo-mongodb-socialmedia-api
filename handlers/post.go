@@ -33,6 +33,7 @@ func (h *PostHandler) GetPosts(c echo.Context) error {
 	var posts []models.Post
 
 	cursor.All(context.TODO(), &posts)
+
 	return c.JSON(http.StatusOK, posts)
 
 }
