@@ -41,18 +41,9 @@ func (h *PostHandler) GetPosts(c echo.Context) error {
 
 func (h *PostHandler) GetPost(c echo.Context) error {
 
-	postId, err := primitive.ObjectIDFromHex(c.Param("id"))
+	postId, _ := primitive.ObjectIDFromHex(c.Param("id"))
 
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-
-	}
-	var post models.Post
-	if err := h.postColl.FindOne(context.TODO(), bson.M{"_id": postId}).Decode(&post); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, post)
+	return c.JSON(http.StatusOK, postId)
 
 }
 
