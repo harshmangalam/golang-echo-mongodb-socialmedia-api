@@ -41,9 +41,33 @@ func (h *PostHandler) GetPosts(c echo.Context) error {
 
 func (h *PostHandler) GetPost(c echo.Context) error {
 
-	postId, _ := primitive.ObjectIDFromHex(c.Param("id"))
+	postId, err := primitive.ObjectIDFromHex(c.Param("id"))
 
-	return c.JSON(http.StatusOK, postId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// match := bson.D{{"$match", bson.D{{"_id", postId}}}}
+	// lookup := bson.D{{"$lookup", bson.D{{"from", "user"}, {"localField", "userId"}, {"foreignField", "_id"}, {"as", "User"}}}}
+	// cursor, err := h.postColl.Aggregate(context.TODO(), mongo.Pipeline{lookup, match})
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// res := bson.M{}
+	// _ = cursor.All(context.TODO(), res)
+
+	var post models.Post
+	var user models.User
+
+	h.postColl.FindOne(context.TODO(), bson.M{"_id": postId}).Decode(&post)
+	h.userColl.FindOne(context.TODO(), bson.M{"_id": post.UserId}).Decode(&user)
+
+	post.User = &user
+
+	post.User.Password = ""
+	return c.JSON(http.StatusOK, post)
 
 }
 
